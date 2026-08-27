@@ -1,0 +1,288 @@
+body {
+    background-color: #ffffff;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333333;
+    margin: 0;
+    padding: 40px;
+}
+
+h1 {
+    font-size: 36px;
+    color: #333333;
+}
+
+p {
+    font-size: 18px;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+}
+
+nav {
+    display: flex;
+    gap: 24px;
+}
+
+nav a {
+    color: #333333;
+    text-decoration: none;
+}
+
+.works-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 80px;
+    margin-top: 80px;
+}
+
+.project {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+}
+
+.project img {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    object-fit: cover;
+}
+
+.project img:nth-child(1) {
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.project img:nth-child(2) {
+    top: 7%;
+    left: 7%;
+    z-index: 2;
+}
+
+.project img:nth-child(3) {
+    top: 14%;
+    left: 14%;
+    z-index: 1;
+}
+
+.project-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 80px;
+    row-gap: 40px;
+    margin-top: 40px;
+}
+
+.project-gallery img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.project-page {
+    display: block;
+}
+
+.contact-page a {
+    color: #333333;
+    text-decoration: none;
+}
+
+header h1 a {
+    color: #333333;
+    text-decoration: none;
+}
+
+.project img {
+    transition: filter 0.3s ease;
+}
+
+.project-info {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 80%;
+    height: 80%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    color: #333333;
+
+    opacity: 0;
+    z-index: 4;
+
+    transition: opacity 0.3s ease;
+}
+
+.project:hover img {
+    filter: blur(6px);
+}
+
+.project:hover .project-info {
+    opacity: 1;
+}
+
+.lightbox {
+    display: none;
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(255, 255, 255, 0.96);
+
+    z-index: 1000;
+}
+
+.lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.lightbox-content img {
+    max-width: 70vw;
+    max-height: 85vh;
+
+    object-fit: contain;
+}
+
+.lightbox-info {
+    width: 220px;
+}
+
+.lightbox-close {
+    position: absolute;
+
+    top: 30px;
+    right: 40px;
+
+    border: none;
+    background: none;
+
+    font-size: 36px;
+    cursor: pointer;
+}
+
+.lightbox-prev,
+.lightbox-next {
+    position: absolute;
+
+    top: 50%;
+
+    border: none;
+    background: none;
+
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.lightbox-prev {
+    left: 30px;
+}
+
+.lightbox-next {
+    right: 30px;
+}
+
+.gallery-image {
+    cursor: pointer;
+}
+
+footer {
+    margin-top: 100px;
+    text-align: center;
+    color: #333333;
+}
+
+footer p {
+    font-size: 12px;
+
+}
+
+@media (max-width: 800px) {
+
+    body {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    nav {
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .works-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+        margin-top: 50px;
+    }
+
+    .project {
+        aspect-ratio: 4 / 5;
+    }
+
+    .project-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .lightbox-content {
+        flex-direction: column;
+        gap: 20px;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .lightbox-content img {
+        max-width: 90vw;
+        max-height: 65vh;
+    }
+
+    .lightbox-info {
+        width: auto;
+        text-align: center;
+    }
+
+    .lightbox-prev {
+        left: 10px;
+    }
+
+    .lightbox-next {
+        right: 10px;
+    }
+
+    .lightbox-close {
+        top: 15px;
+        right: 20px;
+    }
+
+    .about-page,
+    .contact-page,
+    .project-page {
+        margin-top: 50px;
+    }
+}
