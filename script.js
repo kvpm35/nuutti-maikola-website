@@ -6,7 +6,6 @@ const lightbox = document.getElementById("lightbox");
 if (lightbox) {
 
     const lightboxImage = document.getElementById("lightbox-image");
-    const lightboxTitle = document.getElementById("lightbox-title");
 
     const closeButton = document.querySelector(".lightbox-close");
     const prevButton = document.querySelector(".lightbox-prev");
@@ -18,7 +17,6 @@ if (lightbox) {
         currentImageIndex = index;
 
         lightboxImage.src = images[currentImageIndex].src;
-        lightboxTitle.textContent = images[currentImageIndex].alt;
     }
 
     images.forEach((image, index) => {
