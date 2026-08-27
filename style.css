@@ -181,6 +181,7 @@ header h1 a {
     border: none;
     background: none;
 
+    color: #333333;
     font-size: 36px;
     cursor: pointer;
 }
@@ -194,15 +195,18 @@ header h1 a {
     border: none;
     background: none;
 
+    color: #333333;
     font-size: 40px;
     cursor: pointer;
 }
 
 .lightbox-prev {
+    color: #333333;
     left: 30px;
 }
 
 .lightbox-next {
+    color: #333333;
     right: 30px;
 }
 
