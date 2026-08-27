@@ -286,3 +286,11 @@ footer p {
         margin-top: 50px;
     }
 }
+
+.project.touch-active img {
+    filter: blur(6px);
+}
+
+.project.touch-active .project-info {
+    opacity: 1;
+}

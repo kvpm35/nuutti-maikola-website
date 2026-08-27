@@ -76,3 +76,17 @@ document.addEventListener("keydown", (event) => {
         showImage(currentImageIndex);
     }
 });
+
+const projects = document.querySelectorAll(".project");
+
+projects.forEach((project) => {
+    project.addEventListener("touchstart", () => {
+        project.classList.add("touch-active");
+    });
+
+    project.addEventListener("touchend", () => {
+        setTimeout(() => {
+            project.classList.remove("touch-active");
+        }, 500);
+    });
+});
