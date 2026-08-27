@@ -87,16 +87,22 @@ if (lightbox) {
 
 const projects = document.querySelectorAll(".project");
 
-function activateProjectUnderFinger(touch) {
+let touchActive = false;
+let touchX = 0;
+let touchY = 0;
+let animationFrame = null;
+
+function updateProjectUnderFinger() {
+
+    if (!touchActive) {
+        return;
+    }
 
     projects.forEach((project) => {
         project.classList.remove("touch-active");
     });
 
-    const elementUnderFinger = document.elementFromPoint(
-        touch.clientX,
-        touch.clientY
-    );
+    const elementUnderFinger = document.elementFromPoint(touchX, touchY);
 
     if (!elementUnderFinger) {
         return;
@@ -109,10 +115,26 @@ function activateProjectUnderFinger(touch) {
     }
 }
 
+function requestTouchUpdate() {
+
+    if (animationFrame) {
+        return;
+    }
+
+    animationFrame = requestAnimationFrame(() => {
+        updateProjectUnderFinger();
+        animationFrame = null;
+    });
+}
+
 document.addEventListener("touchstart", (event) => {
 
     if (event.touches.length > 0) {
-        activateProjectUnderFinger(event.touches[0]);
+        touchActive = true;
+        touchX = event.touches[0].clientX;
+        touchY = event.touches[0].clientY;
+
+        requestTouchUpdate();
     }
 
 }, { passive: true });
@@ -121,13 +143,38 @@ document.addEventListener("touchstart", (event) => {
 document.addEventListener("touchmove", (event) => {
 
     if (event.touches.length > 0) {
-        activateProjectUnderFinger(event.touches[0]);
+        touchX = event.touches[0].clientX;
+        touchY = event.touches[0].clientY;
+
+        requestTouchUpdate();
+    }
+
+}, { passive: true });
+
+
+window.addEventListener("scroll", () => {
+
+    if (touchActive) {
+        requestTouchUpdate();
     }
 
 }, { passive: true });
 
 
 document.addEventListener("touchend", () => {
+
+    touchActive = false;
+
+    projects.forEach((project) => {
+        project.classList.remove("touch-active");
+    });
+
+});
+
+
+document.addEventListener("touchcancel", () => {
+
+    touchActive = false;
 
     projects.forEach((project) => {
         project.classList.remove("touch-active");
