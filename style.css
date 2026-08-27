@@ -122,12 +122,16 @@ header h1 a {
     transition: opacity 0.3s ease;
 }
 
-.project:hover img {
-    filter: blur(6px);
-}
+@media (hover: hover) and (pointer: fine) {
 
-.project:hover .project-info {
-    opacity: 1;
+    .project:hover img {
+        filter: blur(6px);
+    }
+
+    .project:hover .project-info {
+        opacity: 1;
+    }
+
 }
 
 .lightbox {
