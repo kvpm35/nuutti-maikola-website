@@ -58,6 +58,9 @@
     }
     </script>
 
+    analytics code 
+    
+
 </head>
 
 <body>
@@ -148,6 +151,13 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <script>
+        fetch("/api/visit", {
+        method: "POST",
+        keepalive: true
+        }).catch(() => {});
+    </script>
 
 </body>
 

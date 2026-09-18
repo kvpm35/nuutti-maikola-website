@@ -1,0 +1,6 @@
+worker.js
+wrangler.jsonc
+optimize_images.py
+.git
+.gitignore
+image_backup

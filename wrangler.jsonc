@@ -1,0 +1,19 @@
+{
+  "name": "nuutti-maikola-website",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-18",
+
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nuutti-analytics",
+      "database_id": "2586832f-669d-4ea6-ab49-cbeea4a55fbe"
+    }
+  ]
+}
