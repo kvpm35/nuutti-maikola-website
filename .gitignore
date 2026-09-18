@@ -1,1 +1,4 @@
 image_backup/
+
+.wrangler/
+*.rtf
