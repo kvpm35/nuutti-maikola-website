@@ -15,5 +15,9 @@
       "database_name": "nuutti-analytics",
       "database_id": "2586832f-669d-4ea6-ab49-cbeea4a55fbe"
     }
-  ]
+  ],
+
+    "triggers": {
+        "crons": ["0 7 * * MON"]
+  }
 }

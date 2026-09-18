@@ -1,6 +1,9 @@
 async function sendWeeklyReport(env) {
 
-    // Käynnit viimeisen 7 päivän ajalta
+    // --------------------------------------------------
+    // 1. Lasketaan viimeisen 7 päivän käynnit
+    // --------------------------------------------------
+
     const currentWeek = await env.DB.prepare(`
         SELECT COUNT(*) AS visits
         FROM pageviews
@@ -8,7 +11,10 @@ async function sendWeeklyReport(env) {
     `).first();
 
 
-    // Käynnit sitä edeltävän 7 päivän ajalta
+    // --------------------------------------------------
+    // 2. Lasketaan sitä edeltävän 7 päivän käynnit
+    // --------------------------------------------------
+
     const previousWeek = await env.DB.prepare(`
         SELECT COUNT(*) AS visits
         FROM pageviews
@@ -21,8 +27,11 @@ async function sendWeeklyReport(env) {
     const previousVisits = previousWeek.visits;
 
 
-    // Lasketaan muutos edelliseen viikkoon
-    let changeText = "Ei vertailutietoa";
+    // --------------------------------------------------
+    // 3. Lasketaan prosentuaalinen muutos
+    // --------------------------------------------------
+
+    let changeText = "No comparison data";
 
     if (previousVisits > 0) {
 
@@ -35,52 +44,88 @@ async function sendWeeklyReport(env) {
     }
 
 
-    // Lähetetään raportti Resend API:n kautta
-    const response = await fetch("https://api.resend.com/emails", {
+    // --------------------------------------------------
+    // 4. Muodostetaan raportointijakson päivämäärät
+    //
+    // Cron ajetaan maanantaisin.
+    // Raportissa näytetään edellisen viikon
+    // maanantai–sunnuntai.
+    // --------------------------------------------------
 
-        method: "POST",
+    const now = new Date();
 
-        headers: {
-            "Authorization": `Bearer ${env.RESEND_API_KEY}`,
-            "Content-Type": "application/json"
-        },
+    const endDate = new Date(now);
+    endDate.setUTCDate(endDate.getUTCDate() - 1);
 
-        body: JSON.stringify({
-
-            from:
-                "Nuutti Maikola Website <analytics@nuuttimaikola.com>",
-
-            to: [
-                "konsta.maikola@kolumbus.fi",
-                "nuutti.maikola@kolumbus.fi"
-            ],
-
-            subject:
-                "Nuutti Maikola – Weekly Website Report",
-
-            html: `
-                <h2>Weekly Website Report</h2>
-
-                <p>
-                    Website visits during the last 7 days:
-                    <strong>${visits}</strong>
-                </p>
-
-                <p>
-                    Previous 7 days:
-                    <strong>${previousVisits}</strong>
-                </p>
-
-                <p>
-                    Change:
-                    <strong>${changeText}</strong>
-                </p>
-            `
-        })
-    });
+    const startDate = new Date(now);
+    startDate.setUTCDate(startDate.getUTCDate() - 7);
 
 
-    // Jos Resend palauttaa virheen, tallennetaan virhe lokiin
+    const formatDate = (date) =>
+        `${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()}`;
+
+
+    const reportingPeriod =
+        `${formatDate(startDate)}–${formatDate(endDate)}`;
+
+
+    // --------------------------------------------------
+    // 5. Lähetetään raportti Resend API:n kautta
+    // --------------------------------------------------
+
+    const response = await fetch(
+        "https://api.resend.com/emails",
+        {
+            method: "POST",
+
+            headers: {
+                "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                from:
+                    "Nuutti Maikola Website <analytics@nuuttimaikola.com>",
+
+                to: [
+                    "konsta.maikola@kolumbus.fi",
+                    "nuutti.maikola@kolumbus.fi"
+                ],
+
+                subject:
+                    "Nuutti Maikola – Weekly Website Report",
+
+                html: `
+                    <h2>Nuutti Maikola – Weekly Website Report</h2>
+
+                    <p>
+                        <strong>${reportingPeriod}</strong>
+                    </p>
+
+                    <p>
+                        Website visits:
+                        <strong>${visits}</strong>
+                    </p>
+
+                    <p>
+                        Previous week:
+                        <strong>${previousVisits}</strong>
+                    </p>
+
+                    <p>
+                        Change:
+                        <strong>${changeText}</strong>
+                    </p>
+                `
+            })
+        }
+    );
+
+
+    // Jos Resend palauttaa virheen,
+    // tallennetaan virheen sisältö Worker-lokiin.
+
     if (!response.ok) {
 
         const error = await response.text();
@@ -90,6 +135,7 @@ async function sendWeeklyReport(env) {
 
 
     return {
+        reportingPeriod,
         visits,
         previousVisits,
         changeText
@@ -98,15 +144,29 @@ async function sendWeeklyReport(env) {
 
 
 
+// ======================================================
+// WORKER
+// ======================================================
+
 export default {
 
-    // Tämä suoritetaan verkkosivulle tulevien HTTP-pyyntöjen yhteydessä
+
+    // --------------------------------------------------
+    // HTTP-pyynnöt
+    // --------------------------------------------------
+
     async fetch(request, env) {
 
         const url = new URL(request.url);
 
 
-        // Normaali kävijälaskuri
+        // --------------------------------------------------
+        // Kävijälaskuri
+        //
+        // index.html lähettää POST-pyynnön tähän aina,
+        // kun etusivu ladataan.
+        // --------------------------------------------------
+
         if (
             url.pathname === "/api/visit" &&
             request.method === "POST"
@@ -116,14 +176,25 @@ export default {
                 .prepare("INSERT INTO pageviews DEFAULT VALUES")
                 .run();
 
-            return new Response("Visit recorded", {
-                status: 200
-            });
+
+            return new Response(
+                "Visit recorded",
+                {
+                    status: 200
+                }
+            );
         }
 
 
+        // --------------------------------------------------
         // VÄLIAIKAINEN TESTIREITTI
-        // Tämän avulla voimme testata sähköpostin heti
+        //
+        // Tämän avulla voimme testata viikkoraportin
+        // lähettämisen selaimesta ennen Cronin käyttöönottoa.
+        //
+        // POISTETAAN, kun Resend-testi on onnistunut.
+        // --------------------------------------------------
+
         if (
             url.pathname === "/api/test-weekly-report" &&
             request.method === "GET"
@@ -131,13 +202,16 @@ export default {
 
             try {
 
-                const report = await sendWeeklyReport(env);
+                const report =
+                    await sendWeeklyReport(env);
+
 
                 return Response.json({
                     success: true,
                     message: "Weekly report sent",
                     report: report
                 });
+
 
             } catch (error) {
 
@@ -154,14 +228,32 @@ export default {
         }
 
 
-        // Kaikki muut pyynnöt ovat normaalin sivuston tiedostoja
+        // --------------------------------------------------
+        // Kaikki muut pyynnöt ohjataan normaalille
+        // staattiselle verkkosivustolle.
+        // --------------------------------------------------
+
         return env.ASSETS.fetch(request);
     },
 
 
-    // Tämä suoritetaan myöhemmin Cron Triggerin perusteella
+
+    // --------------------------------------------------
+    // CRON TRIGGER
+    //
+    // Cloudflare käynnistää tämän automaattisesti
+    // wrangler.jsonc-tiedoston Cron-asetuksen perusteella.
+    //
+    // Cron:
+    // 0 7 * * MON
+    //
+    // = joka maanantai klo 07:00 UTC
+    // --------------------------------------------------
+
     async scheduled(event, env, ctx) {
 
-        ctx.waitUntil(sendWeeklyReport(env));
+        ctx.waitUntil(
+            sendWeeklyReport(env)
+        );
     }
 };
