@@ -185,49 +185,6 @@ export default {
             );
         }
 
-
-        // --------------------------------------------------
-        // VÄLIAIKAINEN TESTIREITTI
-        //
-        // Tämän avulla voimme testata viikkoraportin
-        // lähettämisen selaimesta ennen Cronin käyttöönottoa.
-        //
-        // POISTETAAN, kun Resend-testi on onnistunut.
-        // --------------------------------------------------
-
-        if (
-            url.pathname === "/api/test-weekly-report" &&
-            request.method === "GET"
-        ) {
-
-            try {
-
-                const report =
-                    await sendWeeklyReport(env);
-
-
-                return Response.json({
-                    success: true,
-                    message: "Weekly report sent",
-                    report: report
-                });
-
-
-            } catch (error) {
-
-                return Response.json(
-                    {
-                        success: false,
-                        error: error.message
-                    },
-                    {
-                        status: 500
-                    }
-                );
-            }
-        }
-
-
         // --------------------------------------------------
         // Kaikki muut pyynnöt ohjataan normaalille
         // staattiselle verkkosivustolle.
